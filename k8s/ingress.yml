@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: mtd-hri-api-ingress
+  namespace: kpidashboard
+spec:
+  rules:
+    # External endpoint: mesbaseapiserver-atmcmes-ews001.ifactory.wise-stack.com.cn/
+    # Internal endpoint: mesbaseapiserver.atmcmes.ews001.en.internal
+    # appName.namespace.ews001.en.internal  <-- Must follow this rule to name the hostname
+    - host: mtd-hri-api.kpidashboard.ews001.en.internal
+      http:
+        paths:
+        - path: /
+          backend:
+            serviceName: mtd-hri-api-service
+            servicePort: 80

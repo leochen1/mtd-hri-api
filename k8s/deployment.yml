@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mtd-hri-api-deployment
+  labels:
+    app: mtd-hri-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      name: mtd-hri-api-pod
+      app: mtd-hri-api
+  template:
+    metadata:
+      name: mtd-hri-api-pod
+      labels:
+        name: mtd-hri-api-pod
+        app: mtd-hri-api
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - mtd-hri-api
+            topologyKey: "kubernetes.io/hostname"  # 確保 Pod 分佈在不同的節點上
+      imagePullSecrets:
+      - name: docker-registry-harbor
+      containers:
+      - name: mtd-hri-api
+        image: harbor.arfa.wise-paas.com/atmcmes/mtd-hri-api:1.0.1
+        env:
+        - name: TZ
+          value: "Asia/Taipei"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9980
+        envFrom:
+        - configMapRef:
+            name: mtdhri-mongo-config
+        - secretRef:
+            name: kpidashboard-secret
+        resources:
+          requests:
+            cpu: 200m
+            memory: 200Mi
+            ephemeral-storage: 150Mi
+          limits:
+            cpu: 300m
+            memory: 300Mi
+            ephemeral-storage: 200Mi
